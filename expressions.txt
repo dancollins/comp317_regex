@@ -1,0 +1,13 @@
+\.
+aabb
+*
+a[abc]d
+\a*
+a*b*
+a+b
+a?bb
+a|(b[abc])
+\[\*
+[abc]
+[abc
+[ab\c(]

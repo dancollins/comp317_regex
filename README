@@ -1,0 +1,17 @@
+Regular Expression Compiler and String Search
+
+This assignment implements a regex compiler, and uses the compiled
+output to perform a global search of the input (meaning multiple
+matches are possible).
+
+The regex compiler will accept an expression and output a file
+containing a finite state machine.
+
+The string search will accept a finite state machine and an input file
+and output all the lines where the regexp is matched.
+
+COMP317-14A
+Dan Collins 1883446
+Severin Mahoney Marsh
+
+2014
