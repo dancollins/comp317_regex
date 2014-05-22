@@ -24,7 +24,7 @@
  * output the compiled FSM to stdout.
  *
  * Dan Collins 1183446
- * Severin Mahoney Marsh
+ * Severin Mahoney Marsh 1181754
  */
 import java.util.ArrayList;
 
