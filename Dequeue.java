@@ -9,8 +9,8 @@ public class Dequeue<T>{
 	// Node for double linked deque
 	private class Node<T>{
 		T data;
-		Node left;
-		Node right;
+		Node<T> left;
+		Node<T> right;
 
 		public Node(T data){
 			this.data = data;
@@ -20,24 +20,24 @@ public class Dequeue<T>{
 			return data;
 		}
 
-		public void setLeft(Node left){
+		public void setLeft(Node<T> left){
 			this.left = left;
 		}
 
-		public Node getLeft(){
+		public Node<T> getLeft(){
 			return left;
 		}
 
-		public void setRight(Node right){
+	public void setRight(Node<T> right){
 			this.right = right;
 		}
 
-		public Node getRight(Node left){
+		public Node<T> getRight(){
 			return right;
 		}
 	}
-	Node head;
-	Node tail;
+	Node<T> head;
+	Node<T> tail;
 	
 	/*
 	 * Appends data to tail
@@ -62,8 +62,8 @@ public class Dequeue<T>{
 			head = new Node<T>(data);
 			tail = head;
 		} else {
-			head.setLeft(data);
-			head = head.getLeft;
+			head.setLeft(new Node<T>(data));
+			head = head.getLeft();
 		}
 	}
 
