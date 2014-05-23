@@ -12,6 +12,7 @@
  * F -> \v
  * F -> v
  * F -> .
+ * F -> []L]
  * F -> [L]
  * F -> (E)
  * L -> v
@@ -52,9 +53,12 @@ public class Compiler {
 	public static char[] SPECIAL_CHARS = {'\\', '*', '+', '?', '|',
 										  '.', '(', ')', '[', ']'}; 
 
-	public Compiler(String exp) {
-		this.exp = exp;
+	public Compiler() {
 		fsm = new ArrayList<Node>();
+	}
+
+	public void setExpression(String exp) {
+		this.exp = exp;
 	}
 
 	public void compile() throws IllegalArgumentException {
@@ -71,21 +75,27 @@ public class Compiler {
 	}
 
 	private void expression() throws IllegalArgumentException {
+		System.out.print("E ");
+
 		term();
 
 		// Test if we've reached the end of the pattern
 		if (index == exp.length())
 			return;
 
-		// Recursive if a valid number follows
+		// Recursive if a valid character follows
 		if (isVocab(exp.charAt(index)) ||
+			exp.charAt(index) == '\\' ||
 			exp.charAt(index) == '(' ||
 			exp.charAt(index) == '.' ||
-			exp.charAt(index) == '[')
+			exp.charAt(index) == '[' ||
+			exp.charAt(index) == '|')
 			expression();
 	}
 
 	private void term() throws IllegalArgumentException {
+		System.out.print("T ");
+
 		factor();
 
 		// Test if we've reached the end of the pattern
@@ -120,6 +130,7 @@ public class Compiler {
 	}
 
 	private void factor() throws IllegalArgumentException {
+		System.out.print("F ");
 		// Escaped characters
 		if (exp.charAt(index) == '\\') {
 			System.out.println("Consuming \\");
@@ -174,6 +185,8 @@ public class Compiler {
 	}
 
 	private void list() throws IllegalArgumentException {
+		System.out.print("L ");
+
 		if (exp.charAt(index) != ']') {
 			System.out.printf("Literal %c\n", exp.charAt(index));
 			index++;
@@ -208,10 +221,12 @@ public class Compiler {
 			return;
 		}
 
-		Compiler c = new Compiler(args[0]);
+		Compiler c = new Compiler();
+		c.setExpression(args[0]);
 		try {
 			c.compile();
 		} catch (IllegalArgumentException e) {
+			System.out.println();
 			System.err.println(e.getMessage());
 		}
 
