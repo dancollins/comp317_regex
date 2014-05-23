@@ -44,17 +44,27 @@ public class Searcher {
 							deque.unshift(null);
 						}
 						break;
-					// Check if sucess
+					// Check if sucess 
+					// Now only handles the case where the begining state is sucess
 					} else if (state.equals(consumables.length - 1)){
 						sucess = true;
 						break;
 					// If branching push states
 					} else if (consumables[state] == null){
+						if (states1[state] == consumables.length - 1 
+								|| states2[state] == consumables.length - 1){
+							sucess = true;
+							break;
+						}
 						deque.push(states1[state]);
 						deque.push(states2[state]);
 					// Other consumables go here (Like WILD)
 					// If correct character unshift state
 					} else if (consumables[state].equals(character)) {
+						if (states1[state] == consumables.length - 1) {
+							sucess = true;
+							break;
+						}
 						System.out.println("Found "+character);
 						deque.unshift(states1[state]);
 					}
