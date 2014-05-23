@@ -49,6 +49,7 @@ public class Dequeue<T>{
 			head = tail;
 		} else {
 			tail.setRight(new Node<T>(data));
+			tail.getRight().setLeft(tail);
 			tail = tail.getRight();
 		}
 	}
@@ -63,6 +64,7 @@ public class Dequeue<T>{
 			tail = head;
 		} else {
 			head.setLeft(new Node<T>(data));
+			head.getLeft().setRight(head);
 			head = head.getLeft();
 		}
 	}
