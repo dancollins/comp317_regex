@@ -11,10 +11,13 @@
  */
 public class Searcher {
 	public static void main(String[] args){
+		// Parsing the fsm goes here
 		// Null here is the branching state
 		String[] consumables = new String[]{null, "a", "b", null, "c", null};
 		int[] states1 = new int[]{1, 3, 5, 2, 5, -1};
 		int[] states2 = new int[]{-1, -1, -1, 4, -1, -1};
+
+		// The loop that tries all strings goes here
 		String str = "This yam has abbs of steel.";
 		
 		// Loop to search the string
@@ -26,14 +29,20 @@ public class Searcher {
 			// Add first state to the deque
 			deque.push(states1[0]);
 			for (int offset = 0; i + offset < str.length(); offset++){
+				// I use a string instead of a char (or Character) as I'm skittish about using
+				// String.equals(char)
+				// This could likely be improved
 				String character = str.substring(i+offset, i+offset+1);
 				while (true){
 					Integer state = deque.pop();
 					System.out.println(state);
 					// If scan (null) move scan, increment offset and continue
 					if (state == null) {
-						deque.unshift(null);
-						// TODO: Bail if deque is empty!
+						// Leave the deque empty if the scan was the only item left
+						// This signals the upper loop to break
+						if (!deque.isEmpty()){
+							deque.unshift(null);
+						}
 						break;
 					// Check if sucess
 					} else if (state.equals(consumables.length - 1)){
@@ -50,10 +59,15 @@ public class Searcher {
 						deque.unshift(states1[state]);
 					}
 				}
+				// Victory
 				if (sucess) {
+					break;
+				// If the deque is empty this substring has failed
+				} else if (deque.isEmpty()){
 					break;
 				}
 			}
+			// Output the satisfactory line
 			if (sucess) {
 				System.out.println(str);
 				break;

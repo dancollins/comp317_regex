@@ -108,4 +108,11 @@ public class Dequeue<T>{
 			return value;
 		}
 	}
+
+	/*
+	 * Tells you if the deque is empty
+	 */
+	public boolean isEmpty(){
+		return head == null;
+	}
 }
