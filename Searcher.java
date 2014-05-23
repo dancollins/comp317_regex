@@ -12,7 +12,7 @@
 public class Searcher {
 	public static void main(String[] args){
 		// Null here is the branching state
-		Character[] consumables = new Character[]{null, 'a', 'b', null, 'c', null};
+		String[] consumables = new String[]{null, "a", "b", null, "c", null};
 		int[] states1 = new int[]{1, 3, 5, 2, 5, -1};
 		int[] states2 = new int[]{-1, -1, -1, 4, -1, -1};
 		String str = "This yam has abbs of steel.";
@@ -25,13 +25,38 @@ public class Searcher {
 			deque.push(null);
 			// Add first state to the deque
 			deque.push(states1[0]);
-			int offset = 0;
 			for (int offset = 0; i + offset < str.length(); offset++){
-				Character c = str.charAt(i+offset);
-				// Check if sucess
-				// If branching push states
-				// If correct character unshift state
-				// If scan (null) move scan, increment offset and continue
+				String character = str.substring(i+offset, i+offset+1);
+				while (true){
+					Integer state = deque.pop();
+					System.out.println(state);
+					// If scan (null) move scan, increment offset and continue
+					if (state == null) {
+						deque.unshift(null);
+						// TODO: Bail if deque is empty!
+						break;
+					// Check if sucess
+					} else if (state.equals(consumables.length - 1)){
+						sucess = true;
+						break;
+					// If branching push states
+					} else if (consumables[state] == null){
+						deque.push(states1[state]);
+						deque.push(states2[state]);
+					// Other consumables go here (Like WILD)
+					// If correct character unshift state
+					} else if (consumables[state].equals(character)) {
+						System.out.println("Found "+character);
+						deque.unshift(states1[state]);
+					}
+				}
+				if (sucess) {
+					break;
+				}
+			}
+			if (sucess) {
+				System.out.println(str);
+				break;
 			}
 		}
 	}
