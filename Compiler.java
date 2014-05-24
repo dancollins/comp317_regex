@@ -59,8 +59,8 @@ public class Compiler {
 		}
 
 		public String toString() {
-			//return String.format("%s\n%d\n%d", literal, next1, next2);
-			return String.format("%s,%d,%d", literal, next1, next2);
+			return String.format("%s\n%d\n%d", literal, next1, next2);
+			//return String.format("%s,%d,%d", literal, next1, next2);
 		}
 	}
 
