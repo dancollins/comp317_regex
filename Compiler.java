@@ -118,7 +118,7 @@ public class Compiler {
 			exp.charAt(index) == '(' ||
 			exp.charAt(index) == '.' ||
 			exp.charAt(index) == '[')
-			r = expression();
+			/*r = */expression();
 
 		return r;
 	}
