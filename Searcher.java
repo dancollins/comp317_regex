@@ -22,6 +22,9 @@ public class Searcher {
 		BufferedReader in;
 		// Parsing the FSM goes here 
 		try {
+			if (args.length != 2){
+				throw new RuntimeException("Run with 'java Searcher [FSM] [Text]'");
+			}
 			Object[] fsm = parseFSM(new BufferedReader(new FileReader(args[0])));
 			consumables = (String[])fsm[0];
 			states1 = (Integer[])fsm[1];
