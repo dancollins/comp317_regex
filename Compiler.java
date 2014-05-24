@@ -446,8 +446,8 @@ public class Compiler {
 		try {
 			c.compile();
 		} catch (IllegalArgumentException e) {
-			System.out.println();
 			System.err.println(e.getMessage());
+			System.exit(-1);
 		}
 
 		fsm = c.getFSM();
