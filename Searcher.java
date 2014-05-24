@@ -138,7 +138,7 @@ public class Searcher {
 				if (state.equals(consumables.length - 1)){
 					return true;
 				// If branching push states
-				} else if (consumables[state].equals("")){
+				} else if (consumables[state].equals("NULL")){
 					if (states1[state].equals(consumables.length - 1) 
 							|| states2[state].equals(consumables.length - 1)){
 						return true;
