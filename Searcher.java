@@ -14,14 +14,13 @@ import java.util.ArrayList;
  * Severin Mahoney-Marsh 1181754
  */
 public class Searcher {
-	public static void main(String[] args){
-		// Null here is the branching state
-		String[] consumables = new String[]{"", "a", "b", "", "c", ""};
-		Integer[] states1 = new Integer[]{1, 3, 5, 2, 5, -1};
-		Integer[] states2 = new Integer[]{-1, -1, -1, 4, -1, -1};
+	public static void main(String[] args) throws IOException{
+		// The FSM and reader
+		String[] consumables;
+		Integer[] states1;
+		Integer[] states2;
 		BufferedReader in;
-		// Parsing the FSM goes here TODO: Test this
-		/*
+		// Parsing the FSM goes here 
 		try {
 			Object[] fsm = parseFSM(new BufferedReader(new FileReader(args[0])));
 			consumables = (String[])fsm[0];
@@ -29,79 +28,86 @@ public class Searcher {
 			states2 = (Integer[])fsm[2];
 			in = new BufferedReader(new FileReader(args[1]));
 		} catch (Exception e){
-			System.err.printf("%s%n%s%n", e.getMessage(), e.getStackTrace());
+			System.err.println("Setup Failed!");
+			System.err.println(e.getMessage());
+			e.printStackTrace();
 			return;
 		}
-		*/
-
-		// The loop that tries all strings goes here
-		String str = "This yam has abbs of steel.";
-		// String str = in.readLine();
-		//while (str != null){
-			// Loop to search the string
-			boolean sucess = false;
-			for (int i = 0; i < str.length(); i++){
-				Dequeue<Integer> deque = new Dequeue<Integer>();
-				// Null here is the scan
-				deque.push(null);
-				// Add first state to the deque
-				deque.push(states1[0]);
-				for (int offset = 0; i + offset < str.length(); offset++){
-					// I use a string instead of a char (or Character) as I'm skittish about using
-					// String.equals(char)
-					// This could likely be improved
-					String character = str.substring(i+offset, i+offset+1);
-					while (true){
-						Integer state = deque.pop();
-						System.out.println(state);
-						// If scan (null) move scan, increment offset and continue
-						if (state == null) {
-							// Leave the deque empty if the scan was the only item left
-							// This signals the upper loop to break
-							if (!deque.isEmpty()){
-								deque.unshift(null);
-							}
-							break;
-						// Check if sucess 
-						// Now only handles the case where the begining state is sucess
-						} else if (state.equals(consumables.length - 1)){
-							sucess = true;
-							break;
-						// If branching push states
-						} else if (consumables[state].equals("")){
-							if (states1[state].equals(consumables.length - 1) 
-									|| states2[state].equals(consumables.length - 1)){
+		// Unwieldy try catch for in.readLine()
+		try {
+			// The loop that tries all strings goes here
+			// String str = "This yam has abbs of steel.";
+			String str = in.readLine();
+			while (str != null){
+				// Loop to search the string
+				boolean sucess = false;
+				for (int i = 0; i < str.length(); i++){
+					Dequeue<Integer> deque = new Dequeue<Integer>();
+					// Null here is the scan
+					deque.push(null);
+					// Add first state to the deque
+					deque.push(states1[0]);
+					for (int offset = 0; i + offset < str.length(); offset++){
+						// I use a string instead of a char (or Character) as I'm skittish about using
+						// String.equals(char)
+						// This could likely be improved
+						String character = str.substring(i+offset, i+offset+1);
+						while (true){
+							Integer state = deque.pop();
+							// If scan (null) move scan, increment offset and continue
+							if (state == null) {
+								// Leave the deque empty if the scan was the only item left
+								// This signals the upper loop to break
+								if (!deque.isEmpty()){
+									deque.unshift(null);
+								}
+								break;
+							// Check if sucess 
+							// Now only handles the case where the begining state is sucess
+							} else if (state.equals(consumables.length - 1)){
 								sucess = true;
 								break;
+							// If branching push states
+							} else if (consumables[state].equals("")){
+								if (states1[state].equals(consumables.length - 1) 
+										|| states2[state].equals(consumables.length - 1)){
+									sucess = true;
+									break;
+								}
+								deque.push(states1[state]);
+								deque.push(states2[state]);
+							// Other consumables go here (Like WILD)
+							// If correct character unshift state
+							} else if (consumables[state].equals(character)) {
+								if (states1[state].equals(consumables.length - 1)) {
+									sucess = true;
+									break;
+								}
+								deque.unshift(states1[state]);
 							}
-							deque.push(states1[state]);
-							deque.push(states2[state]);
-						// Other consumables go here (Like WILD)
-						// If correct character unshift state
-						} else if (consumables[state].equals(character)) {
-							if (states1[state].equals(consumables.length - 1)) {
-								sucess = true;
-								break;
-							}
-							System.out.println("Found "+character);
-							deque.unshift(states1[state]);
+						}
+						// Victory
+						if (sucess) {
+							break;
+						// If the deque is empty this substring has failed
+						} else if (deque.isEmpty()){
+							break;
 						}
 					}
-					// Victory
+					// Output the satisfactory line
 					if (sucess) {
-						break;
-					// If the deque is empty this substring has failed
-					} else if (deque.isEmpty()){
+						System.out.println(str);
 						break;
 					}
 				}
-				// Output the satisfactory line
-				if (sucess) {
-					System.out.println(str);
-					break;
-				}
+				// Get the next line
+				str = in.readLine();
 			}
-		//}
+		} catch (IOException e){
+			System.err.println("Error while reading text.");
+			System.err.println(e.getMessage());
+			e.printStackTrace();
+		}
 	}
 	
 	/*
