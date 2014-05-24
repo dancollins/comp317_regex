@@ -116,6 +116,7 @@ public class Searcher {
 			// String.equals(char)
 			// This could likely be improved
 			String character = str.substring(i+offset, i+offset+1);
+			boolean[] visited = new boolean[consumables.length];
 			while (true){
 				Integer state = deque.pop();
 				// If scan (null) move scan, increment offset and continue
@@ -126,9 +127,15 @@ public class Searcher {
 						deque.unshift(null);
 					}
 					break;
+				}
+				if (visited[state]){
+					continue;
+				} else {
+					visited[state] = true;
+				}
 				// Check if sucess 
 				// Now only handles the case where the begining state is sucess
-				} else if (state.equals(consumables.length - 1)){
+				if (state.equals(consumables.length - 1)){
 					return true;
 				// If branching push states
 				} else if (consumables[state].equals("")){
