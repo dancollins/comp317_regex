@@ -124,11 +124,11 @@ public class Compiler {
 	}
 
 	private int disjunction() throws IllegalArgumentException {
-		int r, s1, s2, t1, t2;
+		int r, s1, e1, s2, e2;
 		
 		// Get start and end states for the term
 		s1 = term();
-		t1 = state;
+		e1 = state-1;
 		r = s1;
 
 		// Test if we've reached the end of the pattern
@@ -140,23 +140,27 @@ public class Compiler {
 			// Consume |
 			index++;
 
-			// Get the start and end states for the next term
-			s2 = disjunction();
-			t2 = state;
-
-			// Create a branching machine to point to the start states of
-			// both terms
-			setState(state, "NULL", s1, s2);
+			// Create a branching machine to point to the start of
+			// the term, and the start of the disjunction
+			setState(state, "NULL", s1, state+1);
 			r = state;
 			state++;
+
+			// Get the start and end states for the disjunction
+			s2 = disjunction();
+			e2 = state-1;
+
+			// Update the branching machine to point to the start of
+			// the term and the new disjunction
+			setState(r, s1, s2);
 
 			// Create an end state for this machine
 			setState(state, "NULL", state+1, state+1);
 			state++;
 
 			// Point both terms to the end state
-			setState(t1, state-1, state-1);
-			setState(t2, state-1, state-1);
+			setState(e1, state-1, state-1);
+			setState(e2, state-1, state-1);
 		}
 
 		// Return the start state of this machine
