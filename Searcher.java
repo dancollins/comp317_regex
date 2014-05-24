@@ -147,7 +147,8 @@ public class Searcher {
 					deque.push(states2[state]);
 				// Other consumables go here (Like WILD)
 				// If correct character unshift state
-				} else if (consumables[state].equals(character)) {
+				} else if (consumables[state].equals(character)
+						|| consumables[state].equals("WILD")) {
 					if (states1[state].equals(consumables.length - 1)) {
 						return true;
 					}
