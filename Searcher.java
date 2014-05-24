@@ -160,7 +160,25 @@ public class Searcher {
 				return false;
 			}
 		}
-		// Ran out of characters, this substring has failed
-		return false;
+		// Ran out of characters. Any freebes to the goal? 
+		// Otherwise this substring has failed
+		while (true){
+			Integer state = deque.pop();
+			if (state == null){
+				if (deque.isEmpty())
+					return false;
+				else
+					deque.push(null);
+			}
+			if (consumables[state].equals("NULL")){
+				if (states1[state].equals(consumables.length - 1)
+						|| states2[state].equals(consumables.length - 1)){
+					return true;
+				} else {
+					deque.push(states1[state]);
+					deque.push(states2[state]);
+				}
+			}
+		}
 	}
 }
