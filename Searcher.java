@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 /**
  * Accepts arg[0] a path to a Finite State Machine
  * Accepts arg[1] a path to a text
@@ -83,5 +87,43 @@ public class Searcher {
 				break;
 			}
 		}
+	}
+	
+	/*
+	 * Parses a file and creates a FSM
+	 * Returns an Object array where 
+	 * 	[0] is the literals (String[])
+	 * 	[1] is the first states (Integer[])
+	 * 	[2] is the second states (Integer[])
+	 * Unfortunately I've been using a lot of ruby recently.
+	 */
+	private static Object[] parseFSM(BufferedReader in) throws NumberFormatException, IOException{
+		ArrayList<String> consumables = new ArrayList<String>();
+		ArrayList<Integer> states1 = new ArrayList<Integer>();
+		ArrayList<Integer> states2 = new ArrayList<Integer>();
+		String line = in.readLine();
+		while (line != null){
+			// Parse literal
+			consumables.add(line);
+			line = in.readLine();
+			// Check for failure
+			if (line == null){
+				throw new RuntimeException("The FSM is malformed! Lines%3=1!");
+			}
+			// Parse first state
+			states1.add(Integer.parseInt(line));
+			line = in.readLine();
+			// Check for failure
+			if (line == null){
+				throw new RuntimeException("The FSM is malformed! Lines%3=2!");
+			}
+			// Parse second state
+			states2.add(Integer.parseInt(line));
+			line = in.readLine();
+		}
+		// 'ArrayList.toArray(T[] a) => T[]' looks like a hack to me.
+		// Admittedly returning an Object array is also a hack.
+		return new Object[]{consumables.toArray(new String[0]), 
+					states1.toArray(new Integer[0]), states2.toArray(new Integer[0])};
 	}
 }
