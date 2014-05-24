@@ -16,9 +16,10 @@ import java.util.ArrayList;
 public class Searcher {
 	public static void main(String[] args){
 		// Null here is the branching state
-		String[] consumables = new String[]{null, "a", "b", null, "c", null};
+		String[] consumables = new String[]{"", "a", "b", "", "c", ""};
 		Integer[] states1 = new Integer[]{1, 3, 5, 2, 5, -1};
 		Integer[] states2 = new Integer[]{-1, -1, -1, 4, -1, -1};
+		BufferedReader in;
 		// Parsing the FSM goes here TODO: Test this
 		/*
 		try {
@@ -26,6 +27,7 @@ public class Searcher {
 			consumables = (String[])fsm[0];
 			states1 = (Integer[])fsm[1];
 			states2 = (Integer[])fsm[2];
+			in = new BufferedReader(new FileReader(args[1]));
 		} catch (Exception e){
 			System.err.printf("%s%n%s%n", e.getMessage(), e.getStackTrace());
 			return;
@@ -65,7 +67,7 @@ public class Searcher {
 						sucess = true;
 						break;
 					// If branching push states
-					} else if (consumables[state] == null){
+					} else if (consumables[state].equals("")){
 						if (states1[state].equals(consumables.length - 1) 
 								|| states2[state].equals(consumables.length - 1)){
 							sucess = true;
