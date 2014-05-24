@@ -15,11 +15,22 @@ import java.util.ArrayList;
  */
 public class Searcher {
 	public static void main(String[] args){
-		// Parsing the fsm goes here
 		// Null here is the branching state
 		String[] consumables = new String[]{null, "a", "b", null, "c", null};
-		int[] states1 = new int[]{1, 3, 5, 2, 5, -1};
-		int[] states2 = new int[]{-1, -1, -1, 4, -1, -1};
+		Integer[] states1 = new Integer[]{1, 3, 5, 2, 5, -1};
+		Integer[] states2 = new Integer[]{-1, -1, -1, 4, -1, -1};
+		// Parsing the FSM goes here TODO: Test this
+		/*
+		try {
+			Object[] fsm = parseFSM(new BufferedReader(new FileReader(args[0])));
+			consumables = (String[])fsm[0];
+			states1 = (Integer[])fsm[1];
+			states2 = (Integer[])fsm[2];
+		} catch (Exception e){
+			System.err.printf("%s%n%s%n", e.getMessage(), e.getStackTrace());
+			return;
+		}
+		*/
 
 		// The loop that tries all strings goes here
 		String str = "This yam has abbs of steel.";
@@ -55,8 +66,8 @@ public class Searcher {
 						break;
 					// If branching push states
 					} else if (consumables[state] == null){
-						if (states1[state] == consumables.length - 1 
-								|| states2[state] == consumables.length - 1){
+						if (states1[state].equals(consumables.length - 1) 
+								|| states2[state].equals(consumables.length - 1)){
 							sucess = true;
 							break;
 						}
@@ -65,7 +76,7 @@ public class Searcher {
 					// Other consumables go here (Like WILD)
 					// If correct character unshift state
 					} else if (consumables[state].equals(character)) {
-						if (states1[state] == consumables.length - 1) {
+						if (states1[state].equals(consumables.length - 1)) {
 							sucess = true;
 							break;
 						}
