@@ -32,23 +32,41 @@ import java.util.ArrayList;
 
 public class Compiler {
 	class Node {
-		char literal;
+		String literal;
 		int next1;
 		int next2;
 
-		public Node(char lit, int n1, int n2) {
+		public Node(String lit, int n1, int n2) {
 			literal = lit;
 			next1 = n1;
 			next2 = n2;
 		}
 
+		public void setNext1(int n1) {
+			next1 = n1;
+		}
+
+		public void setNext2(int n2) {
+			next2 = n2;
+		}
+
+		public int getNext1() {
+			return next1;
+		}
+
+		public int getNext2() {
+			return next2;
+		}
+
 		public String toString() {
-			return String.format("%c\n%d\n%d", literal, next1, next2);
+			//return String.format("%s\n%d\n%d", literal, next1, next2);
+			return String.format("%s,%d,%d", literal, next1, next2);
 		}
 	}
 
 	private String exp;
 	private int index;
+	private int state;
 	private ArrayList<Node> fsm;
 
 	public static char[] SPECIAL_CHARS = {'\\', '*', '+', '?', '|',
@@ -63,24 +81,36 @@ public class Compiler {
 	}
 
 	public void compile() throws IllegalArgumentException {
+		int initial;
+
 		index = 0;
+		state = 1;
 
 		try {
-			expression();
+			// Create a placeholder state for the initial state.
+			// We'll update it later.
+			setState(0, "NULL", 0, 0);
+			initial = expression();
+			setState(0, initial, initial);
 		} catch (StringIndexOutOfBoundsException e) {
 			error();
 		}
 
 		if (index != exp.length())
 			error();
+
+		// Point back to the start of the FSM
+		setState(state, "NULL", 0, 0);
 	}
 
-	private void expression() throws IllegalArgumentException {
-		disjunction();
+	private int expression() throws IllegalArgumentException {
+		int r;
+
+		r = disjunction();
 
 		// Test if we've reached the end of the pattern
 		if (index == exp.length())
-			return;
+			return r;
 
 		// Recursive if a valid character follows
 		if (isVocab(exp.charAt(index)) ||
@@ -88,82 +118,171 @@ public class Compiler {
 			exp.charAt(index) == '(' ||
 			exp.charAt(index) == '.' ||
 			exp.charAt(index) == '[')
-			expression();
+			r = expression();
+
+		return r;
 	}
 
-	private void disjunction() throws IllegalArgumentException {
-		term();
+	private int disjunction() throws IllegalArgumentException {
+		int r, s1, s2, t1, t2;
+		
+		// Get start and end states for the term
+		s1 = term();
+		t1 = state;
+		r = s1;
 
 		// Test if we've reached the end of the pattern
 		if (index == exp.length())
-			return;
+			return r;
 
 		// Recurse if this is a disjunction
 		if (exp.charAt(index) == '|') {
-			System.out.println("Consuming |");
+			// Consume |
 			index++;
-			disjunction();
+
+			// Get the start and end states for the next term
+			s2 = disjunction();
+			t2 = state;
+
+			// Create a branching machine to point to the start states of
+			// both terms
+			setState(state, "NULL", s1, s2);
+			r = state;
+			state++;
+
+			// Create an end state for this machine
+			setState(state, "NULL", state+1, state+1);
+			state++;
+
+			// Point both terms to the end state
+			setState(t1, state-1, state-1);
+			setState(t2, state-1, state-1);
 		}
+
+		// Return the start state of this machine
+		return r;
 	}
 
-	private void term() throws IllegalArgumentException {
-		factor();
+	private int term() throws IllegalArgumentException {
+		int r, start;
 
-		// Test if we've reached the end of the pattern
+		// Save the state pointing to this one
+		start = state-1;
+
+		r = factor();
+
+		// Test if we've reached the end of the pattern, and if we
+		// have return the start state for the factor machine
 		if (index == exp.length())
-			return;
+			return r;
 
 		// Zero or more
 		if (exp.charAt(index) == '*') {
-			System.out.println("Consuming *");
+			// Create a branching state that points to the factor
+			// and the state after the factor.
+			setState(state, "NULL", r, state+1);
+			r = state;
+			state++;
+
+			// Consume *
 			index++;
 		}
 
 		// One or more
 		else if (exp.charAt(index) == '+') {
-			System.out.println("Consuming +");
+			// Create a branching state that points to the factor,
+			// and the state after the factor
+			setState(state, "NULL", r, state+1);
+			state++;
+			
+			// Consume +
 			index++;
 		}
 
 		// Zero or one
 		else if (exp.charAt(index) == '?') {
-			System.out.println("Consuming ?");
+			// Create a branching state that points to the factor,
+			// and the state after the factor
+			setState(state, "NULL", r, state+1);
+			r = state;
+			state++;
+
+			// Create an end state for this machine
+			setState(state, "NULL", state+1, state+1);
+			state++;
+
+			// Point the factor to the end state
+			setState(r, state-1, state-1);
+			r = state-1;
+
 			index++;
 		}
+
+		// Return the start state of this machine
+		return r;
 	}
 
-	private void factor() throws IllegalArgumentException {
+	private int factor() throws IllegalArgumentException {
+		int r, l;
+
+		r = state;
+
 		// Escaped characters
 		if (exp.charAt(index) == '\\') {
-			System.out.println("Consuming \\");
+			// Consume \
 			index++;
-			System.out.printf("Literal %c\n", exp.charAt(index));
+
+			// Update FSM to contain character
+			setState(state, String.valueOf(exp.charAt(index)),
+					 state+1, state+1);
+			state++;
+
+			// Consume escaped literal
 			index++;
 		}
 
 		// Literals
 		else if (isVocab(exp.charAt(index))) {
-			System.out.printf("Literal %c\n", exp.charAt(index));
+			// Update FSM to contain character
+			setState(state, String.valueOf(exp.charAt(index)),
+					 state+1, state+1);
+			state++;
+
+			// Consume literal
 			index++;
 		}
 
 		// Any literal
 		else if (exp.charAt(index) == '.') {
-			System.out.println("Consuming .");
+			// Update FSM to contain character
+			setState(state, "WILD", state+1, state+1);
+			state++;
+
+			// Consume wild card
 			index++;
 		}
 
 		// List of literals
 		else if (exp.charAt(index) == '[') {
-			System.out.println("Consuming [");
+			// Consume [
 			index++;
+
+			// Create a branching machine that will be the entry point
+			// into this list.  We will update what it points to later
+			setState(state, "NULL", state+1, state+1);
+			state++;
+
+			// If the first character is ], then it should be in the
+			// literal list.  This is a special case!
 			if (exp.charAt(index) == ']') {
-				System.out.println("Literal ]");
 				index++;
 			}
-			list();
+			
+			l = list();
+
+			// Make sure the list was valid
 			if (exp.charAt(index) == ']') {
-				System.out.println("Consuming ]");
+				// Consume ]
 				index++;
 			} else
 				error();
@@ -171,11 +290,9 @@ public class Compiler {
 
 		// Nested expression
 		else if (exp.charAt(index) == '(') {
-			System.out.println("Consuming (");
 			index++;
-			expression();
+			r = expression();
 			if (exp.charAt(index) == ')') {
-				System.out.println("Consuming )");
 				index++;
 			} else
 				error();
@@ -184,14 +301,72 @@ public class Compiler {
 		// This isn't a factor!
 		else
 			error();
+
+		// Return the start state of this machine
+		return r;
 	}
 
-	private void list() throws IllegalArgumentException {
+	private int list() throws IllegalArgumentException {
 		if (exp.charAt(index) != ']') {
-			System.out.printf("Literal %c\n", exp.charAt(index));
+			// Consume literal
 			index++;
+
 			list();
 		}
+
+		return 0;
+	}
+
+	private void setState(int state, String s, int n1, int n2) {
+		Node n = new Node(s, n1, n2);
+		
+		// State will replace an existing state
+		if (state < fsm.size()) {
+			try {
+				fsm.remove(state);
+				fsm.add(state, n);
+			} catch (IndexOutOfBoundsException e) {
+				System.err.println("This shouldn't happen..!");
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
+
+		// State is a new state
+		else if (state == fsm.size()) {
+			fsm.add(n);
+		}
+
+		// This is invalid
+		else {
+			System.err.println("State value is too large for list!");
+			System.err.printf("state: %d, fsm.size(): %d\n", state,
+							  fsm.size());
+			System.exit(-1);
+		}
+	}
+
+	private void setState(int state, int n1, int n2) {
+		Node n = fsm.remove(state);
+
+		// If both new links point to the same place, we handle it
+		// a bit differently.
+		if (n1 == n2) {
+			// If the links are the same, then set both
+			if (n.getNext1() == n.getNext2()) {
+				n.setNext1(n1);
+				n.setNext2(n1);
+			}
+
+			// Otherwise, just set the second link
+			else
+				n.setNext2(n1);
+		} else {
+			n.setNext1(n1);
+			n.setNext2(n2);
+		}
+
+		fsm.add(state, n);
 	}
 
 	private boolean isVocab(char c) {
@@ -217,7 +392,8 @@ public class Compiler {
 		ArrayList<Node> fsm;
 
 		if (args.length < 1) {
-			System.err.println("This program requires a regex as an argument!");
+			System.err.println("This program requires a regex as an" +
+							   "argument!");
 			return;
 		}
 
@@ -230,9 +406,9 @@ public class Compiler {
 			System.err.println(e.getMessage());
 		}
 
-		//fsm = c.getFSM();
-		//for (Node n : fsm) {
-		//	System.out.println(n.toString());
-		//}
+		fsm = c.getFSM();
+		for (int i = 0; i < fsm.size(); i++) {
+			System.out.printf("%d: %s\n", i, fsm.get(i));
+		}
 	}
 }
