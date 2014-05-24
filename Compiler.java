@@ -452,7 +452,8 @@ public class Compiler {
 
 		fsm = c.getFSM();
 		for (int i = 0; i < fsm.size(); i++) {
-			System.out.printf("%d: %s\n", i, fsm.get(i));
+			//System.out.printf("%d: %s\n", i, fsm.get(i));
+			System.out.printf("%s\n", i, fsm.get(i));
 		}
 	}
 }
