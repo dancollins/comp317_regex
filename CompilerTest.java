@@ -69,9 +69,11 @@ class CompilerTest {
 			System.err.println("Error reading line from file.");
 		}
 
-		System.out.println("Failed tests:");
-		for (String s : l) {
-			System.out.println(s);
+		if (l.size() > 0) {
+			System.out.println("Failed tests:");
+			for (String s : l) {
+				System.out.println(s);
+			}
 		}
 	}
 }

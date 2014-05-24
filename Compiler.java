@@ -2,13 +2,14 @@
  * This class implements a regular expression compiler using the
  * following rules:
  *
- * E -> T
- * E -> TE
+ * E -> D
+ * E -> DE
+ * D -> T
+ * D -> T|D
  * T -> F
  * T -> F*
  * T -> F+
  * T -> F?
- * T -> F|T
  * F -> \v
  * F -> v
  * F -> .
@@ -42,7 +43,7 @@ public class Compiler {
 		}
 
 		public String toString() {
-			return String.format("%c,%d,%d", literal, next1, next2);
+			return String.format("%c\n%d\n%d", literal, next1, next2);
 		}
 	}
 
@@ -75,9 +76,7 @@ public class Compiler {
 	}
 
 	private void expression() throws IllegalArgumentException {
-		System.out.print("E ");
-
-		term();
+		disjunction();
 
 		// Test if we've reached the end of the pattern
 		if (index == exp.length())
@@ -88,14 +87,26 @@ public class Compiler {
 			exp.charAt(index) == '\\' ||
 			exp.charAt(index) == '(' ||
 			exp.charAt(index) == '.' ||
-			exp.charAt(index) == '[' ||
-			exp.charAt(index) == '|')
+			exp.charAt(index) == '[')
 			expression();
 	}
 
-	private void term() throws IllegalArgumentException {
-		System.out.print("T ");
+	private void disjunction() throws IllegalArgumentException {
+		term();
 
+		// Test if we've reached the end of the pattern
+		if (index == exp.length())
+			return;
+
+		// Recurse if this is a disjunction
+		if (exp.charAt(index) == '|') {
+			System.out.println("Consuming |");
+			index++;
+			disjunction();
+		}
+	}
+
+	private void term() throws IllegalArgumentException {
 		factor();
 
 		// Test if we've reached the end of the pattern
@@ -119,18 +130,9 @@ public class Compiler {
 			System.out.println("Consuming ?");
 			index++;
 		}
-
-		// Disjuction
-		else if (exp.charAt(index) == '|') {
-			System.out.println("Consuming |");
-			index++;
-
-			term();
-		}
 	}
 
 	private void factor() throws IllegalArgumentException {
-		System.out.print("F ");
 		// Escaped characters
 		if (exp.charAt(index) == '\\') {
 			System.out.println("Consuming \\");
@@ -185,8 +187,6 @@ public class Compiler {
 	}
 
 	private void list() throws IllegalArgumentException {
-		System.out.print("L ");
-
 		if (exp.charAt(index) != ']') {
 			System.out.printf("Literal %c\n", exp.charAt(index));
 			index++;
