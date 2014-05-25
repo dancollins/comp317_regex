@@ -301,11 +301,14 @@ public class Compiler {
 
 			// Add the square bracket if nessicary
 			if (bracket >= 0){
-				// The branching state and it's child
+				// The branching state will include it's child and bracket
 				setState(state-2, state-1, bracket);
 				// The bracket
 				setState(bracket, state, state);
 			}
+			// Make a branching maching to catch all the loose ends
+			setState(state, "NULL", state+1, state+1);
+			state++;
 
 			// Make sure the list was valid
 			if (exp.charAt(index) == ']') {
