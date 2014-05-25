@@ -145,10 +145,21 @@ public class Searcher {
 					}
 					deque.push(states1[state]);
 					deque.push(states2[state]);
-				// Other consumables go here (Like WILD)
+				// The wild state. Accepts most characters.
+				} else if (consumables[state].equals("WILD")){
+					// Ignore if the character is special
+					if (!(character.equals("*") || character.equals("+")
+							|| character.equals("?") || character.equals(".")
+							|| character.equals("\\") || character.equals("[")
+							|| character.equals("]") || character.equals("(")
+							|| character.equals(")") || character.equals("|"))){
+						if (states1[state].equals(consumables.length - 1)) {
+							return true;
+						}
+						deque.unshift(states1[state]);
+					}
 				// If correct character unshift state
-				} else if (consumables[state].equals(character)
-						|| consumables[state].equals("WILD")) {
+				} else if (consumables[state].equals(character)){
 					if (states1[state].equals(consumables.length - 1)) {
 						return true;
 					}
