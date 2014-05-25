@@ -279,19 +279,30 @@ public class Compiler {
 			// state pointing to the start of the list, or having the
 			// consuming ']' state pointing to the start of the list.
 			// Is is a waste of a state..!
+			// Int to track ']'
+			int bracket = -1;
 			if (exp.charAt(index) == ']') {
 				// Consume ]
 				index++;
+				bracket = state;
 
 				// Create a state to consume the ]
-				setState(state, "]", state+1, state+1);
-				r = state;
+				setState(state, "]", -1, -1);
 				state++;
 			}
 
 			// Figure out where the list starts (and also build the
 			// rest of the list FSM).
-			r = list(state+1);
+			r = state;
+			list();
+
+			// Add the square bracket if nessicary
+			if (bracket >= 0){
+				// The branching state and it's child
+				setState(state-2, state-1, bracket);
+				// The bracket
+				setState(bracket, state, state);
+			}
 
 			// Make sure the list was valid
 			if (exp.charAt(index) == ']') {
@@ -319,49 +330,33 @@ public class Compiler {
 		return r;
 	}
 
-	private int list(int entry) throws IllegalArgumentException {
-		int r, e1, s2;
-
-		// If this list is done, we just want to point to the entry
-		// point of the previous list
-		r = entry;
-		
-		// The end state for the previous list
-		e1 = state-1;
-
+	private void list() throws IllegalArgumentException {
 		if (exp.charAt(index) != ']') {
 			// Make sure there is a character available.  It is an
 			// error for there not to be!
 			if (index == exp.length())
 				error();
-
-			// Create a branching machine to point to the start of the
-			// previous list and the start of the new list
-			setState(state, "NULL", entry, state+1);
-			r = state;
+			// Decide if we are the last item in the list
+			boolean last = exp.charAt(index+1) == ']';
+			// Create a branching machine to point to the literal and if 
+			// necessary to the next branching machine of the list
+			setState(state, "NULL", last ? state+1 : state+2, state+1);
 			state++;
 
-			// Create a state to consume the literal
-			setState(state, String.valueOf(exp.charAt(index)),
-					 state+1, state+1);
-			s2 = state;
+			// Create a state to consume the literal and remember it's
+			// position for later
+			int lit = state;
+			setState(state, String.valueOf(exp.charAt(index)), -1, -1);
 			state++;
 			index++;
 
-			// Create an end state for this machine
-			setState(state, "NULL", state+1, state+1);
-			state++;
+			// Recurse if nessicary
+			if (!last)
+				list();
 
-			// Point the exit state of the previous machine to the
-			// end state
-			setState(e1, state-1, state-1);
-
-			// Try to recurse.  This will just return the value we
-			// pass if there is no further list
-			r = list(r);
+			// Set the literal states end to the end of the list
+			setState(lit, state, state);
 		}
-
-		return r;
 	}
 
 	private void setState(int state, String s, int n1, int n2) {
