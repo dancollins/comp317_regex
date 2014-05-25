@@ -59,8 +59,8 @@ public class Compiler {
 		}
 
 		public String toString() {
-			//return String.format("%s\n%d\n%d", literal, next1, next2);
-			return String.format("%s,%d,%d", literal, next1, next2);
+			return String.format("%s\n%d\n%d", literal, next1, next2);
+			//return String.format("%s,%d,%d", literal, next1, next2);
 		}
 	}
 
@@ -453,8 +453,8 @@ public class Compiler {
 
 		fsm = c.getFSM();
 		for (int i = 0; i < fsm.size(); i++) {
-			System.out.printf("%d: %s\n", i, fsm.get(i));
-			//System.out.printf("%s\n", fsm.get(i));
+			//System.out.printf("%d: %s\n", i, fsm.get(i));
+			System.out.printf("%s\n", fsm.get(i));
 		}
 	}
 }
