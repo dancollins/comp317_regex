@@ -1,0 +1,12 @@
+#!/bin/bash
+if ! [[ -e Compiler.class && -e Searcher.class ]]; then
+	echo Compiling classes.
+	javac Compiler.java Searcher.java
+fi
+
+if [ $# != 2 ]; then
+	echo Use \'regex [The Regex] [The path to text]\'
+else
+	java Compiler $1 > .TEMPFSM && java Searcher .TEMPFSM $2
+	rm .TEMPFSM
+fi
