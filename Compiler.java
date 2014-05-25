@@ -59,8 +59,8 @@ public class Compiler {
 		}
 
 		public String toString() {
-			return String.format("%s\n%d\n%d", literal, next1, next2);
-			//return String.format("%s,%d,%d", literal, next1, next2);
+			//return String.format("%s\n%d\n%d", literal, next1, next2);
+			return String.format("%s,%d,%d", literal, next1, next2);
 		}
 	}
 
@@ -104,9 +104,10 @@ public class Compiler {
 	}
 
 	private int expression() throws IllegalArgumentException {
-		int r;
+		int r, e1, s2;
 
 		r = disjunction();
+		e1 = state-1;
 
 		// Test if we've reached the end of the pattern
 		if (index == exp.length())
@@ -117,8 +118,10 @@ public class Compiler {
 			exp.charAt(index) == '\\' ||
 			exp.charAt(index) == '(' ||
 			exp.charAt(index) == '.' ||
-			exp.charAt(index) == '[')
-			/*r = */expression();
+			exp.charAt(index) == '[') {
+			s2 = expression();
+			setState(e1, s2, s2);
+		}
 
 		return r;
 	}
@@ -452,8 +455,8 @@ public class Compiler {
 
 		fsm = c.getFSM();
 		for (int i = 0; i < fsm.size(); i++) {
-			//System.out.printf("%d: %s\n", i, fsm.get(i));
-			System.out.printf("%s\n", fsm.get(i));
+			System.out.printf("%d: %s\n", i, fsm.get(i));
+			//System.out.printf("%s\n", fsm.get(i));
 		}
 	}
 }
